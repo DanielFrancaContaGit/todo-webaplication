@@ -2,7 +2,7 @@ FROM node:current-slim
 
 RUN mkdir -p /app
 
-WORKDIR /pp
+WORKDIR /app
 
 COPY . .
 
