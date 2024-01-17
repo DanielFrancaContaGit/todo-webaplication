@@ -1,3 +1,8 @@
+networks:
+  app_network:
+    driver: host
+
+
 services:
   frontend:
     build: 
@@ -6,14 +11,15 @@ services:
       - backend
     env_file:
       - ./frontend/.env
+    environment:
+      - SERVER_URL=http://0.0.0.0:8000/todo/
     ports:
-      - 3000:3000
+      - 3000:3000 
     command: sh -c "npm run build &&
                     node ./.output/server/index.mjs"
-    # expose:
-    #   - 3000:3000                        
-
-
+    networks:
+      - app_network                
+                     
   backend:
     build: 
       context: ./backend
@@ -23,22 +29,28 @@ services:
       - ./backend/.env
     environment:
       - POSTGRES_HOST=db
-    ports:
-      - 8000:8000
-      # - 35729:35729    
+    # ports:
+    #   - 8000:8000
+    expose:
+      - 8000
+    # links:
+    #   # - frontend
+    #   - db  
+    #   # - 35729:35729    
     command: sh -c "python manage.py makemigrations &&
                     python manage.py migrate &&
                     gunicorn --bind 0.0.0.0:8000 server.wsgi"
-    # expose:
-    #   - 8000:8000     
-
+    networks:
+      - app_network                
 
   db:
     image: postgres:12.17-alpine
     # env_file:
     #   - ./backend/.env
-    ports:
-      - 5432:5432
+    # ports:
+    #   - 5432:5432
+    expose:
+      - 5432
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data  
     environment:
@@ -46,3 +58,5 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_NAME}
       - PGPORT=${POSTGRES_PORT}
+    networks:
+      - app_network
