@@ -1,4 +1,4 @@
-FROM python:3.9.18-slim
+FROM python:3.9.18-alpine
 
 RUN mkdir -p /app
 
@@ -11,9 +11,11 @@ ENV PYTHONUNBUFFERED 1
 
 COPY . .
 
-RUN pip install --upgrade pip  
+RUN apk add --update --no-cache --virtual .tmp gcc libc-dev linux-headers
+RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt 
+RUN apk del .tmp
 
 # RUN python manage.py makemigrations
 
